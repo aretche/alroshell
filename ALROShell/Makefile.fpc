@@ -1,0 +1,17 @@
+[target]
+programs= ALROShell
+units= analizador comandos utilidades ALR
+
+[compiler]
+version= 2.4.0
+
+[package]
+name= ALROShell
+version= 2.0
+
+[default]
+fpcdir= ../..
+
+[install]
+datadir= /usr/share/man/man1/
+files= ../Documentacion/ALROShell.1.gz
