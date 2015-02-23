@@ -1,0 +1,21 @@
+http://askubuntu.com/questions/107308/how-do-i-use-git-with-google-code-on-ubuntu
+
+Requisitos:
+	google code y control de versiones = git
+	sudo apt-get install gitg (instala git tambien)
+
+Obtener carpeta "git"
+	git clone https://code.google.com/p/[PROYECTO]/
+
+1)
+	en .netrc:
+		machine [PROYECTO].googlecode.com  login [USUARIO] password [USUARIO]
+
+2)
+	git remote add googlecode https://[PROYECTO].googlecode.com/git
+
+3)
+	con gitg analizar los cambios dentro de la carpeta creada, "stage" todos y agregar un mensaje para el "commit"
+
+4)	desde la carpeta 
+		git push googlecode master
