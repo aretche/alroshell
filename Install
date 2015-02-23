@@ -1,0 +1,5 @@
+cd ALROShell
+fpcmake Makefile.fpc
+sudo make install
+sudo make clean
+sudo rm -f fpcmade.i386-linux ALROShell Package.fpc Makefile

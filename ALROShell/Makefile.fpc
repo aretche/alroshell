@@ -13,10 +13,17 @@ version= 2.0
 fpcdir= ../..
 
 [clean]
-units= Analizador Comandos Utilidades ALR
+files = units/
+
 
 [install]
 datadir= /usr/share/man/man1/
 files= ../Documentacion/ALROShell.1.gz
 
+[rules]
 
+clean = true
+
+.PHONY : clean
+clean : 
+	rm -r -f units
