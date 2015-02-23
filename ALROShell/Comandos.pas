@@ -1,9 +1,9 @@
-UNIT comandos;
+UNIT Comandos;
 
 INTERFACE
 
 Uses 
-	BaseUnix, Unix, utilidades, users, ALR;
+	BaseUnix, Unix, Utilidades, users, ALR;
 
 procedure cat	(var dir1,dir2: string; tipo: byte);						// CAT - Concatena hasta dos archivos, o un archivo con la salida estandar
 procedure exec 	(param1: String; param2: Array of AnsiString; tipo:byte);	// EXEC - Ejecuta un programa externo. Ruta relativa o absoluta.
@@ -123,18 +123,7 @@ Begin
 End;
 
 
-//Comando LS
-procedure ls (modoA,modoF,modoL:boolean);
-{
-	Segun los parametros booleanos distingue entre dos tipos de LS
-	y dentro de los mismos actua acorde a dichas variables
-}
-begin
-if modoL then
-	lsL(modoA,modoF,modoL)
-else
-	lsAF(modoA,modoF);
-end;
+
 
 
 procedure lsAF(modoA,modoF:boolean);
@@ -314,7 +303,18 @@ Begin
 		end;	
 End;
 
-
+//Comando LS
+procedure ls (modoA,modoF,modoL:boolean);
+{
+	Segun los parametros booleanos distingue entre dos tipos de LS
+	y dentro de los mismos actua acorde a dichas variables
+}
+begin
+if modoL then
+	lsL(modoA,modoF,modoL)
+else
+	lsAF(modoA,modoF);
+end;
 
 //Comando PWD
 procedure pwd(tipo: byte);

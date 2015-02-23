@@ -3,7 +3,7 @@ unit ALR;
 INTERFACE
 
 	uses 
-		baseUnix, Unix, Linux, errors,sysutils,utilidades;
+		baseUnix, Unix, Linux, errors, sysutils, Utilidades;
 
 	type 
 		puntero=^nodo;

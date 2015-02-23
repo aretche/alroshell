@@ -1,0 +1,187 @@
+.TH ALROShell 1 "23 de Febrero de 2015" 2.0 ALROShell \" -*- nroff -*-
+
+
+
+.SH NAME
+ALROShell 
+
+
+
+.SH SYNOPSIS
+.B ALROShell
+
+
+
+.SH COPYRIGHT
+ ALROShell is Copyright (C) 2013-2015 Free Software Foundation, Inc.	
+
+
+
+.SH DESCRIPTION
+ALROShell es una shell experimental que lleva adelante algunas de las principales funciones de la shell nativa de Linux.
+.br 
+ALROShell fue modificada a partir de OShell, como parte del Trabajo Práctico Final de la cátedra Sistemas Operativos de la carrera Ingeniera en Sistemas de Información, Universidad Tecnológica Nacional, Facultad Regional Concepción del Uruguay.
+
+
+.SH SHELL BUILTIN COMMANDS
+
+.B ls [ruta] 
+.br
+	   Lista en pantalla los archivos del directorio actual o
+.br
+	   del directorio "ruta". Las opciones -a, -f y -l se 
+.br
+	   pueden combinar.
+.PP
+.B ls -a [ruta]
+.br
+	   Lista en pantalla los archivos del directorio actual o
+.br
+	   del directorio "ruta", incluyendo los archivos 
+.br
+	   ocultos, ordenandolos alfabéticamente e indicando el
+.br
+	   tipo de archivo. Las opciones -a, -f y -l se pueden
+.br
+	   combinar.
+
+.PP
+.B ls -f [ruta]
+.br
+	   Lista en pantalla los archivos del directorio actual o
+.br
+	   del directorio "ruta", sin indicar de que tipo son 
+.br
+	   y sin ordenarlos alfabeticamente. Las opciones -a, -f
+.br
+	   y -l se pueden combinar.
+
+.PP
+.B ls -l [ruta]
+.br
+	   Lista en pantalla los archivos del directorio actual o
+.br
+	   del directorio "ruta", en formato de lista, indicando 
+.br
+	   gran cantidad de información de cada archivo. Las opciones
+.br
+	   -a, -f y -l se pueden combinar.
+.PP
+.B pwd
+.br 
+	   Muestra en pantalla la ruta del directorio en el que estamos.
+.br
+	   posicionados.
+.PP
+.B cd [ruta]
+.br
+	   Cambia el directorio de trabajo actual al directorio "ruta".
+
+.PP
+.B kill -id_señal pid 
+.br 
+	   Envia la señal "id_señal" al proceso "pid". Ambos parametros
+.br
+ 	   deben ser de formato numerico. 
+.PP
+.B cat archivo1 [archvo2]
+.br 
+	   Concatena "archivo1" con "archivo2".
+.br
+	   Si solo se le pasa un archivo, lo concatena
+.br
+	   con la salida estandar.
+
+.PP
+.B bg num_proc
+.br
+	   Envía el proceso "num_proc" a segundo plano.
+
+.PP
+.B fg num_proc
+.br
+	   Trae el proceso "num_proc" a primer plano.
+
+.PP
+.B jobs
+.br
+	   Muestra una tabla de los procesos iniciados
+.br
+	   mediante la terminal,en primer o segundo plano,
+.br
+	   indicando por ejemplo su estado actual.
+
+.PP
+.B exit
+.br
+	   Cierra la terminal.
+
+.PP
+.B moo [ -h | texto ]
+.br
+	   Los usuarios de Linux saben a que nos referimos.
+.br
+	   Prueben con 'moo -h' en caso contrario ;)
+
+
+.SH REDIRECTION
+.B Redireccion de Salida estandar
+ 
+.PP
+.B comando > archivo
+.br
+	   Guarda la salida de "comando" en el "archivo". Si el
+.br
+	   archivo no existe, lo crea, y si existe lo reescribe.
+
+.PP
+.B comando >> archivo
+.br
+	   Guarda la salida de "comando" en el "archivo". Si el
+.br
+	   archivo no existe, lo crea, y si existe lo agrega al final.
+
+
+.SH OPERATORS
+
+.PP
+.B &
+.br
+	   Su uso al final de una instruccion iniciará
+.br
+	   la misma en segundo plano
+
+
+.SH PIPE
+.PP
+.B comando1 | comando2
+
+.br
+	   El comando pipe envia la salida del primer como entrada del segundo comando.
+
+
+
+
+.SH COPYRIGHT
+Copyright © 2013-2015 Free Software Foundation, Inc. 
+.br
+Licencia GPLv3+: GNU GPL versión 3 o superior.   http://gnu.org/licences/gpl.html
+.br
+.B ALROShell es software libre: 
+Eres libre de modificarlo y redistribuirlo.
+.br
+No hay ninguna GARANTÍA, en la medida permitida por la ley.
+.br
+.PP
+
+
+
+.SH AUTHORS
+Ramiro Rivera - ramarivera@gmail.com
+.br 
+David Lazbal - davidlazbal@gmail.com
+.br 
+Martín Arrúa - martin94.profugo@gmail.com
+.br
+Fernando Gómez Albornoz - fgalbornoz07@gmail.com
+

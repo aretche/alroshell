@@ -1,5 +1,5 @@
 {
-	ALROShell.pp
+	ALROShell.pas
 
 	Copyright 2015 
 	* Ramiro Rivera					<ramarivera@gmail.com>, 
@@ -27,7 +27,7 @@
 }
 
 Program ALROShell;
-Uses BaseUnix, sysutils, unix, comandos, analizador, utilidades,ALR;
+Uses BaseUnix, sysutils, unix, Comandos, Analizador, Utilidades,ALR;
 
 var salir: boolean;
 	ENTRADA: string;

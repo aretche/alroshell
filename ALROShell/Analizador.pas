@@ -1,9 +1,9 @@
-UNIT analizador;
+UNIT Analizador;
 
 INTERFACE
 
 	Uses  
-		errors, ALR, comandos, utilidades, unix, baseunix, sysutils;	
+		errors, ALR, Comandos, Utilidades, unix, baseunix, sysutils;	
 	
 function analizar		(var ENTRADA: string): boolean;		// Analiza la cadena introducida por el usuario.
 function analizarCD		(DIRECTORIO: string): cint;			// Analiza la cadena para ejecutar el comando CD.

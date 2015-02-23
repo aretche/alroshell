@@ -12,6 +12,11 @@ version= 2.0
 [default]
 fpcdir= ../..
 
+[clean]
+units= Analizador Comandos Utilidades ALR
+
 [install]
 datadir= /usr/share/man/man1/
 files= ../Documentacion/ALROShell.1.gz
+
+
