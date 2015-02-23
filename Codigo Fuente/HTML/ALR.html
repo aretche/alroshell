@@ -1,0 +1,610 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Codigo Fuente de: ALR.pas</title>
+<style type="text/css">
+body {background-color:black}
+span {
+	font-family: 'Courier New';
+	font-size: 9pt;
+	color: #FFFFFF;
+}
+.sc0 {
+}
+.sc1 {
+	font-style: italic;
+	color: #00FF40;
+}
+.sc2 {
+	font-style: italic;
+	color: #0080FF;
+}
+.sc4 {
+	color: #FF00FF;
+}
+.sc5 {
+	font-weight: bold;
+	color: #00FFFF;
+}
+.sc7 {
+	color: #FFFF00;
+}
+.sc9 {
+	color: #808080;
+}
+.sc10 {
+	color: #FF8040;
+}
+.sc12 {
+}
+.sc13 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #000000; "><span class="sc9">unit</span><span class="sc0"> </span><span class="sc1">ALR</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">INTERFACE</span><span class="sc0">
+
+    </span><span class="sc9">uses</span><span class="sc0"> 
+        </span><span class="sc1">baseUnix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">Unix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">Linux</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">errors</span><span class="sc13">,</span><span class="sc1">sysutils</span><span class="sc13">,</span><span class="sc1">utilidades</span><span class="sc13">;</span><span class="sc0">
+
+    </span><span class="sc9">type</span><span class="sc0"> 
+        </span><span class="sc1">puntero</span><span class="sc13">=^</span><span class="sc1">nodo</span><span class="sc13">;</span><span class="sc0">
+
+        </span><span class="sc1">t_procesos</span><span class="sc13">=</span><span class="sc0"> </span><span class="sc9">record</span><span class="sc0">
+                    </span><span class="sc1">nombre</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">prioridad</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">numero</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">directorio</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            
+        </span><span class="sc1">nodo</span><span class="sc13">=</span><span class="sc0">   </span><span class="sc9">record</span><span class="sc0">
+                </span><span class="sc1">info</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">sig</span><span class="sc13">:</span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                
+        </span><span class="sc1">tabla</span><span class="sc13">=</span><span class="sc0">  </span><span class="sc9">record</span><span class="sc0">
+                </span><span class="sc1">cab</span><span class="sc13">:</span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">tam</span><span class="sc13">:</span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">indice</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">var</span><span class="sc0">
+        </span><span class="sc1">alBG</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">              </span><span class="sc4">// El programa debe ejecutarse en bg.
+</span><span class="sc0">        </span><span class="sc1">tablaJobs</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">Tabla</span><span class="sc13">;</span><span class="sc0">           </span><span class="sc4">// Tabla de tareas activas.
+</span><span class="sc0">        </span><span class="sc1">pidEnEjec</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">         </span><span class="sc4">// PID del proceso en primer plano.
+</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">agregarArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">abrirArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">respaldarSalidaEstandar</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">respaldo</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">restaurarStdOut</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+
+</span><span class="sc2">{-----------------------------------------------------------------------------------}</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">AnalizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoFinalizado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">codigoFinalizacionProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoSenializado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">senialRecibidaPorProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">ActualizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">Procedure</span><span class="sc0"> </span><span class="sc1">SIGTSTP_Recibida</span><span class="sc13">(</span><span class="sc1">sig</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">);</span><span class="sc9">cdecl</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Procedure</span><span class="sc0"> </span><span class="sc1">SIGINT_Recibida</span><span class="sc13">(</span><span class="sc1">sig</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">);</span><span class="sc9">cdecl</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">SIGCHLD_Recibida</span><span class="sc13">(</span><span class="sc1">signal</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">LongInt</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">info</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">psiginfo</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">context</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">PSigContext</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">instalarManejadores</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc2">{-----------------------------------------------------------------------------------}</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">crearTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">insertarEnTabla</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">eliminarDeTabla</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc0"> </span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">eliminado</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">mostrarTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">damePid</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">numero</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">eliminarPorEstado</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">correcto</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">eliminado</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">limpiarTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">espacio</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">n</span><span class="sc13">:</span><span class="sc1">byte</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoEnBlanco</span><span class="sc13">():</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">encontrarProceso</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">numeroProceso</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">MostrarUno</span><span class="sc13">(</span><span class="sc1">X</span><span class="sc13">:</span><span class="sc1">T_procesos</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">IMPLEMENTATION</span><span class="sc0">
+
+
+</span><span class="sc9">Procedure</span><span class="sc0"> </span><span class="sc1">SIGTSTP_Recibida</span><span class="sc13">(</span><span class="sc1">sig</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">);</span><span class="sc9">cdecl</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">pidenejec</span><span class="sc13">&lt;&gt;-</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">SIGTSTP</span><span class="sc13">,</span><span class="sc1">pidenejec</span><span class="sc13">)</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">Procedure</span><span class="sc0"> </span><span class="sc1">SIGINT_Recibida</span><span class="sc13">(</span><span class="sc1">sig</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">);</span><span class="sc9">cdecl</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">pidenejec</span><span class="sc13">&lt;&gt;-</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">SIGINT</span><span class="sc13">,</span><span class="sc1">pidenejec</span><span class="sc13">)</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">SIGCHLD_Recibida</span><span class="sc13">(</span><span class="sc1">signal</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">LongInt</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">info</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">psiginfo</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">context</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">PSigContext</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+    Procedimiento a realizar al recibir una sekal SIGCHLD , 
+    la cual se recibe cuando el estado de un proceso hijo es modificado.
+    Este procedimiento analiza la causa de la modificacion y la refleja en la Tabla de JOBS 
+}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">ActualizarEstado</span><span class="sc0">
+        </span><span class="sc13">(</span><span class="sc0">
+        </span><span class="sc1">info</span><span class="sc13">^.</span><span class="sc1">_sifields</span><span class="sc13">.</span><span class="sc1">_sigchld</span><span class="sc13">.</span><span class="sc1">_pid</span><span class="sc13">,</span><span class="sc0">  </span><span class="sc4">//Pid del hijo que envio la senial
+</span><span class="sc0">        </span><span class="sc1">info</span><span class="sc13">^.</span><span class="sc1">_sifields</span><span class="sc13">.</span><span class="sc1">_sigchld</span><span class="sc13">.</span><span class="sc1">_status</span><span class="sc0">    </span><span class="sc4">// Estado de terminacion para ser analizado
+</span><span class="sc0">        </span><span class="sc13">);</span><span class="sc0">
+        
+        </span><span class="sc2">{ 
+            Estructura de psiginfo
+                type psiginfo = ^tsiginfo;
+                
+            Estructura de tsiginfo (en nuestro caso longint = 4)
+            
+                type tsiginfo = 
+                record
+                    si_signo: LongInt;      Signal number
+                    si_errno: LongInt;      Error code
+                    si_code: LongInt;       Extra code (?)
+                    _sifields: record       Extra signal information fields
+                        case LongInt of
+                        0:  (
+                             _pad: array [0..(SI_PAD_SIZE)-1] of LongInt;       Padding element
+                            );
+                        1:  (
+                            _kill:  record              Signal number (or status)
+                                    _pid: pid_t;            Sending process ID
+                                    _uid: uid_t;            Sending User ID
+                                    end;
+                            );
+                        2:  (
+                            _timer: record              Default timer
+                                    _timer1: DWord;         Timer 1 (system time)
+                                    _timer2: DWord;         Timer 2 (user time)
+                                    end;
+                            );
+                        3:  (
+                            _rt:    record                  Posix compatibility record
+                                    _pid: pid_t;                Sending process ID
+                                    _uid: uid_t;                Sending User ID
+                                    _sigval: pointer;           Signal value
+                                    end;
+                            );
+                        4:  (
+                            _sigchld:   record              SIGCHLD signal record
+                                        _pid: pid_t;            Sending process ID
+                                        _uid: uid_t;            Sending User ID
+                                        _status: LongInt;       Signal number (or status, SIGCHLD)
+                                        _utime: clock_t;        User time
+                                        _stime: clock_t;        System time
+                                        end;
+                            );
+                        5:  (
+                            _sigfault:  record              SIGILL, SIGFPE, SIGSEGV, SIGBUS record
+                                        _addr: pointer;         Address (SIGILL, SIGFPE, SIGSEGV, SIGBUS)
+                                        end;
+                            );
+                        6:  (
+                            _sigpoll:   record              SIGPOLL record
+                                        _band: LongInt;         SIGPOLL band
+                                        _fd: LongInt;           SIGPOLL file descriptor
+                                        end;
+                            );
+                        end;
+                end; 
+        }</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">instalarManejadores</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{
+    Instala manejadores de señales personalizados para las señales
+    SIGCHLD ,SIGTSTP y SIGINT
+}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">oldAction</span><span class="sc13">,</span><span class="sc1">newAction</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">PSigActionRec</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">//Punteros hacia registros de acciones ante seniales
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">new</span><span class="sc13">(</span><span class="sc1">newAction</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">new</span><span class="sc13">(</span><span class="sc1">oldAction</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">newAction</span><span class="sc13">^.</span><span class="sc1">sa_Handler</span><span class="sc13">:=</span><span class="sc1">SigActionHandler</span><span class="sc13">(@</span><span class="sc1">SIGCHLD_Recibida</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Asigno el handler a la nueva senial como la funcion SIGCHLD_Recibida
+</span><span class="sc0">    </span><span class="sc1">fillchar</span><span class="sc13">(</span><span class="sc1">newAction</span><span class="sc13">^.</span><span class="sc1">Sa_Mask</span><span class="sc13">,</span><span class="sc1">sizeof</span><span class="sc13">(</span><span class="sc1">newAction</span><span class="sc13">^.</span><span class="sc1">sa_mask</span><span class="sc13">),</span><span class="sc12">#0</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Inicializacion
+</span><span class="sc0">    </span><span class="sc1">newAction</span><span class="sc13">^.</span><span class="sc1">Sa_Flags</span><span class="sc13">:=</span><span class="sc1">SA_SIGINFO</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc2">{o 4}</span><span class="sc0">  </span><span class="sc4">//La senial debera devolver informacion detallada, otras acciones son IGNORAR, o DEFAULT
+</span><span class="sc0">    </span><span class="sc5">{$ifdef Linux}</span><span class="sc0">             </span><span class="sc4">//Compatiblidad Linux
+</span><span class="sc0">        </span><span class="sc1">newAction</span><span class="sc13">^.</span><span class="sc1">Sa_Restorer</span><span class="sc13">:=</span><span class="sc9">Nil</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc5">{$endif}</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">fpSigAction</span><span class="sc13">(</span><span class="sc1">SIGCHLD</span><span class="sc13">,</span><span class="sc1">newAction</span><span class="sc13">,</span><span class="sc1">oldAction</span><span class="sc13">)&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc9">then</span><span class="sc0"> </span><span class="sc4">//Chequeo de errores durante instalacion del nuevo manejador en newAction, el antiguo manejador se guarda en oldAction
+</span><span class="sc0">        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Error en Instalacion: '</span><span class="sc13">,</span><span class="sc1">fpgeterrno</span><span class="sc13">,</span><span class="sc10">'.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">halt</span><span class="sc13">(</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">fpSignal</span><span class="sc13">(</span><span class="sc1">SIGTSTP</span><span class="sc13">,</span><span class="sc1">SignalHandler</span><span class="sc13">(@</span><span class="sc1">SIGTSTP_Recibida</span><span class="sc13">));</span><span class="sc0"> </span><span class="sc4">//Instalo manejador de SIGTSTP
+</span><span class="sc0">    </span><span class="sc1">fpSignal</span><span class="sc13">(</span><span class="sc1">SIGINT</span><span class="sc13">,</span><span class="sc1">SignalHandler</span><span class="sc13">(@</span><span class="sc1">SIGINT_Recibida</span><span class="sc13">));</span><span class="sc0">   </span><span class="sc4">//Instalo manejador de SIGINT
+</span><span class="sc0">    </span><span class="sc2">{
+        fpSignal tiene un subconjutno de la funcionalidad de fpSigAction --&gt; menos funciones
+        No necesito tanta informacion sobre el contexto de la recepcion de TSTP o INT, solo que accion realizar
+    }</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoFinalizado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">procesoFinalizado</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">wifexited</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoSenializado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">procesoSenializado</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">wifsignaled</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">senialRecibidaPorProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">senialRecibidaPorProceso</span><span class="sc13">:=</span><span class="sc1">wtermsig</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">codigoFinalizacionProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">codigoFinalizacionProceso</span><span class="sc13">:=(</span><span class="sc1">WExitstatus</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">));</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">AnalizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{
+    Analiza el estado devuelto por un fpwaitpid, en funcion
+    de la razon de terminacion y/o seniales recibidas por el child
+}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+</span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">procesoFinalizado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc9">begin</span><span class="sc0"> </span><span class="sc4">//El programa finalizo por si mismo
+</span><span class="sc0">            </span><span class="sc1">AnalizarEstado</span><span class="sc13">:=</span><span class="sc10">'Finalizado('</span><span class="sc13">+</span><span class="sc1">asString</span><span class="sc13">(</span><span class="sc1">codigoFinalizacionProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">))+</span><span class="sc10">')'</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">//obtengo su codigo de terminacion (puede haber terminado en error)
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0"> 
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">procesoSenializado</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0"> </span><span class="sc4">//El programa envio SIGCHLD por cambio de estado
+</span><span class="sc0">                </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">senialRecibidaPorProceso</span><span class="sc13">(</span><span class="sc1">estado</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0"> </span><span class="sc4">//analizo la senial que produjo el cambio
+</span><span class="sc0">                
+                </span><span class="sc1">SIGKILL</span><span class="sc13">,</span><span class="sc0">
+                </span><span class="sc1">SIGTERM</span><span class="sc13">,</span><span class="sc0">
+                </span><span class="sc1">SIGINT</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc1">AnalizarEstado</span><span class="sc13">:=</span><span class="sc10">'Terminado'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">SIGKILL</span><span class="sc13">,</span><span class="sc1">pid</span><span class="sc13">);</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                        
+                </span><span class="sc1">SIGCONT</span><span class="sc13">:</span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc1">AnalizarEstado</span><span class="sc13">:=</span><span class="sc10">'Corriendo'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                        
+                </span><span class="sc1">SIGSTOP</span><span class="sc13">,</span><span class="sc0">
+                </span><span class="sc1">SIGTSTP</span><span class="sc13">,</span><span class="sc0">
+                </span><span class="sc1">SIGTTIN</span><span class="sc13">,</span><span class="sc0">
+                </span><span class="sc1">SIGTTOU</span><span class="sc13">:</span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc1">AnalizarEstado</span><span class="sc13">:=</span><span class="sc10">'Detenido'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                        
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">ActualizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0">
+    </span><span class="sc1">Aux</span><span class="sc13">:</span><span class="sc1">T_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">eliminarDeTabla</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">Aux</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">Aux</span><span class="sc13">.</span><span class="sc1">Estado</span><span class="sc13">:=</span><span class="sc1">AnalizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">estado</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">insertarEnTabla</span><span class="sc13">(</span><span class="sc1">Aux</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">dec</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">Indice</span><span class="sc13">);</span><span class="sc0">  
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc2">{-----------------------------------------------------------------------------------}</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">agregarArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc5">{$I-}</span><span class="sc0">
+    </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">,</span><span class="sc1">filename</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">append</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:=(</span><span class="sc1">IOResult</span><span class="sc13">=</span><span class="sc7">0</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">,</span><span class="sc1">filename</span><span class="sc13">,</span><span class="sc1">ok</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc5">{$I+}</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">abrirArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc5">{$I-}</span><span class="sc0">
+    </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">,</span><span class="sc1">filename</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">reset</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:=(</span><span class="sc1">IOResult</span><span class="sc13">=</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0">
+    </span><span class="sc5">{$I+}</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">filename</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc5">{$I-}</span><span class="sc0">
+    </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">,</span><span class="sc1">filename</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">rewrite</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:=(</span><span class="sc1">IOResult</span><span class="sc13">=</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0">
+    </span><span class="sc5">{$I+}</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+    el FD Output (Abstraccion de FPC para el FD 1 = STDOUT)
+    apunta ahora al ARCH.
+}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">fpdup2</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">,</span><span class="sc1">output</span><span class="sc13">)</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">respaldarSalidaEstandar</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">respaldo</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+Duplico y devuelvo el FD de Output para luego restaurarlo
+}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">,</span><span class="sc10">'salidaEstandarRespaldo'</span><span class="sc13">,</span><span class="sc1">ok</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Error Critico'</span><span class="sc13">);</span><span class="sc0"> 
+        </span><span class="sc1">halt</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">fpdup2</span><span class="sc13">(</span><span class="sc1">output</span><span class="sc13">,</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">restaurarStdOut</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">arch</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+Restaura la STDOUT al FD original, el cual DEBE HABER SIDO PREVIAMENTE RESPALDADO
+}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">   
+    </span><span class="sc1">close</span><span class="sc13">(</span><span class="sc1">Output</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">Output</span><span class="sc13">,</span><span class="sc10">''</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">rewrite</span><span class="sc13">(</span><span class="sc1">output</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc1">arch</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">deletefile</span><span class="sc13">(</span><span class="sc10">'salidaEstandarRespaldo'</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc2">{-----------------------------------------------------------------------------------}</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">asString</span><span class="sc13">(</span><span class="sc1">V</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Convierte un número en una cadena}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">S</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">STR</span><span class="sc13">(</span><span class="sc1">V</span><span class="sc13">,</span><span class="sc1">S</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">asString</span><span class="sc13">:=</span><span class="sc1">S</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">crearTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Crea e inicializa la tablaJobs}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">:=</span><span class="sc9">nil</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">:=</span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">indice</span><span class="sc13">:=</span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">insertarEnTabla</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{Agregar un elemento proceso a la tablaJobs, ordenando los mismos por número}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">dir</span><span class="sc13">,</span><span class="sc1">ant</span><span class="sc13">,</span><span class="sc1">act</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">new</span><span class="sc13">(</span><span class="sc1">dir</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">dir</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">:=</span><span class="sc1">x</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">=</span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">&gt;</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">dir</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">:=</span><span class="sc1">dir</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc0"> </span><span class="sc13">&lt;</span><span class="sc0"> </span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">ant</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">:=</span><span class="sc1">dir</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">dir</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">indice</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">eliminarDeTabla</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">eliminado</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{Elimina un elemento proceso de la tablaJobs, según un pid ingresado}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ant</span><span class="sc13">,</span><span class="sc1">act</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+    </span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">eliminado</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">dispose</span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">dec</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">act</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">ant</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">eliminado</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">dispose</span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">dec</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">eliminarPorEstado</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">correcto</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">eliminado</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{Elimina un elemento proceso de la tablaJobs si su estado actual es "Finalizado" o "Terminado"}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ant</span><span class="sc13">,</span><span class="sc1">act</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">correcto</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'Finalizado'</span><span class="sc13">,</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">)&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'Terminado'</span><span class="sc13">,</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">)&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">eliminado</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">dispose</span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">dec</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">correcto</span><span class="sc13">:=</span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'Finalizado'</span><span class="sc13">,</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">)=</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'Terminado'</span><span class="sc13">,</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">)=</span><span class="sc7">0</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">ant</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">act</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">ant</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">eliminado</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">dispose</span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">dec</span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">tam</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">correcto</span><span class="sc13">:=</span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc0">
+            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc1">ok</span><span class="sc13">:=</span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">MostrarUno</span><span class="sc13">(</span><span class="sc1">X</span><span class="sc13">:</span><span class="sc1">T_procesos</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Muestra la información de un elemento proceso de la tablaJobs}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+</span><span class="sc1">MostrarUno</span><span class="sc13">:=</span><span class="sc0">
+    </span><span class="sc10">'['</span><span class="sc13">+(</span><span class="sc1">asString</span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">))+</span><span class="sc10">']'</span><span class="sc13">+</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">prioridad</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">7</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">asString</span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">)))+</span><span class="sc0">
+    </span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">16</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">))+</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">nombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">5</span><span class="sc13">)+</span><span class="sc10">'('</span><span class="sc13">+(</span><span class="sc1">asString</span><span class="sc13">(</span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">pid</span><span class="sc13">))+</span><span class="sc10">')'</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">mostrarTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Muestra todos los elementos proceso de la tablaJobs}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">aux</span><span class="sc13">:</span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'JobID'</span><span class="sc13">,</span><span class="sc1">espacio</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc7">5</span><span class="sc13">),</span><span class="sc10">'Estado'</span><span class="sc13">,</span><span class="sc1">espacio</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc7">10</span><span class="sc13">),</span><span class="sc10">'Nombre'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">repeat</span><span class="sc0">
+            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">MostrarUno</span><span class="sc13">(</span><span class="sc1">aux</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">));</span><span class="sc0">
+            </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">aux</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc1">aux</span><span class="sc13">=</span><span class="sc9">nil</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'No hay trabajos.'</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">damePid</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">numero</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Devuelve el pid de un elemento proceso según un número ingresado}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">act</span><span class="sc13">:</span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">&lt;&gt;</span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc13">&lt;&gt;</span><span class="sc1">numero</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">act</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">act</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc1">damePid</span><span class="sc13">:=</span><span class="sc1">act</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">pid</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc1">damePid</span><span class="sc13">:=-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">limpiarTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Eliminado todos los elementos proceso cuyo estado sea "Finalizado" o "Terminado"}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc13">,</span><span class="sc1">correcto</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">eliminado</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">correcto</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">ok</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">eliminarPorEstado</span><span class="sc13">(</span><span class="sc1">ok</span><span class="sc13">,</span><span class="sc1">correcto</span><span class="sc13">,</span><span class="sc1">eliminado</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">((</span><span class="sc1">correcto</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">eliminado</span><span class="sc13">.</span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">MostrarUno</span><span class="sc13">(</span><span class="sc1">eliminado</span><span class="sc13">));</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">espacio</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc0"> </span><span class="sc1">n</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">):</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Inserta tantos espacios como indique "n"}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">:</span><span class="sc1">byte</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">str</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">str</span><span class="sc13">:=</span><span class="sc10">''</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">:=</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">n</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+        </span><span class="sc1">str</span><span class="sc13">:=</span><span class="sc1">str</span><span class="sc13">+</span><span class="sc10">' '</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">espacio</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc1">str</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">encontrarProceso</span><span class="sc13">(</span><span class="sc1">numeroProceso</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">):</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{Busca un elemento proceso según un número ingresado}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">aux</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">puntero</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">encontrado</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">x</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">encontrarProceso</span><span class="sc13">:=</span><span class="sc1">procesoEnBlanco</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">encontrado</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">tablaJobs</span><span class="sc13">.</span><span class="sc1">cab</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">repeat</span><span class="sc0">
+            </span><span class="sc1">x</span><span class="sc13">:=</span><span class="sc1">aux</span><span class="sc13">^.</span><span class="sc1">info</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">x</span><span class="sc13">.</span><span class="sc1">numero</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc1">numeroProceso</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">encontrado</span><span class="sc13">:=</span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">encontrarProceso</span><span class="sc13">:=</span><span class="sc1">x</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">aux</span><span class="sc13">^.</span><span class="sc1">sig</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">encontrado</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">aux</span><span class="sc13">=</span><span class="sc9">nil</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">procesoEnBlanco</span><span class="sc13">():</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{"Inicializa" los campos de un elemento proceso}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">x</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">with</span><span class="sc0"> </span><span class="sc1">x</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">numero</span><span class="sc13">:=</span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">nombre</span><span class="sc13">:=</span><span class="sc10">'&lt;&lt; Null process &gt;&gt;'</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">pid</span><span class="sc13">:=-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">estado</span><span class="sc13">:=</span><span class="sc10">''</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">prioridad</span><span class="sc13">:=</span><span class="sc10">''</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">directorio</span><span class="sc13">:=</span><span class="sc10">''</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">procesoEnBlanco</span><span class="sc13">:=</span><span class="sc1">x</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">end</span><span class="sc13">.</span><span class="sc0">
+</span></div></body>
+</html>

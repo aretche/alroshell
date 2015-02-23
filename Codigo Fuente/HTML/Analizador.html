@@ -1,0 +1,451 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Codigo Fuente de: Analizador.pas</title>
+<style type="text/css">
+body {background-color:black}
+span {
+	font-family: 'Courier New';
+	font-size: 9pt;
+	color: #FFFFFF;
+}
+.sc0 {
+}
+.sc1 {
+	font-style: italic;
+	color: #00FF40;
+}
+.sc2 {
+	font-style: italic;
+	color: #0080FF;
+}
+.sc4 {
+	color: #FF00FF;
+}
+.sc7 {
+	color: #FFFF00;
+}
+.sc9 {
+	color: #808080;
+}
+.sc10 {
+	color: #FF8040;
+}
+.sc12 {
+}
+.sc13 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #000000; "><span class="sc9">UNIT</span><span class="sc0"> </span><span class="sc1">analizador</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">INTERFACE</span><span class="sc0">
+
+    </span><span class="sc9">Uses</span><span class="sc0">  
+        </span><span class="sc1">errors</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">ALR</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">comandos</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">utilidades</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">unix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">baseunix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">sysutils</span><span class="sc13">;</span><span class="sc0">    
+    
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizar</span><span class="sc0">       </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">     </span><span class="sc4">// Analiza la cadena introducida por el usuario.
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc0">     </span><span class="sc13">(</span><span class="sc1">DIRECTORIO</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">;</span><span class="sc0">         </span><span class="sc4">// Analiza la cadena para ejecutar el comando CD.
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizarEXEC</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">;</span><span class="sc0">         </span><span class="sc4">// Analiza la cadena para ejecutar el comando EXEC.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarCAT</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena para ejecutar el comando CAT.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarKILL</span><span class="sc0">  </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena para ejecutar el comando KILL.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarLS</span><span class="sc0">    </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena para ejecutar el comando LS.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarPWD</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena para ejecutar el comando PWD.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarReDIR</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena si presenta redirección de la salida estándar.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarPipe</span><span class="sc0">  </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena si presenta pipes (tuberías).
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarBG</span><span class="sc0">    </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">              </span><span class="sc4">// Analiza la cadena si presenta solicitud de ejecutarse en 2do plano.
+</span><span class="sc0">
+    
+</span><span class="sc9">IMPLEMENTATION</span><span class="sc0">
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">ARGUMENTOS</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">analizar</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">COMANDO</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">extraerComando</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">         </span><span class="sc4">//se extrae el comando para el case
+</span><span class="sc0">    </span><span class="sc1">ARGUMENTOS</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">;</span><span class="sc0">                       </span><span class="sc4">//se obtienen los argumentos del comando
+</span><span class="sc0">    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">ARGUMENTOS</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">        </span><span class="sc4">//se vuelve a la entrada original
+</span><span class="sc0">        </span><span class="sc1">ENTRADA</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc0"> </span><span class="sc13">+</span><span class="sc0"> </span><span class="sc10">' '</span><span class="sc0"> </span><span class="sc13">+</span><span class="sc0"> </span><span class="sc1">ARGUMENTOS</span><span class="sc0">   
+    </span><span class="sc9">ELSE</span><span class="sc0">
+        </span><span class="sc1">ENTRADA</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">COMANDO</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc1">upcase</span><span class="sc13">(</span><span class="sc1">COMANDO</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'EXIT'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizar</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">false</span><span class="sc0">     </span><span class="sc4">// Salir del programa.
+</span><span class="sc0">    </span><span class="sc9">else</span><span class="sc0"> 
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'JOBS'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">mostrarTabla</span><span class="sc0">         </span><span class="sc4">// Muestra las tareas.
+</span><span class="sc0">        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'HELP'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">help</span><span class="sc0">         </span><span class="sc4">// Muestra una pantalla de ayuda.
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">solicitudBG</span><span class="sc13">(</span><span class="sc1">COMANDO</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">bg</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0">         </span><span class="sc4">// Solicita ejecutar un proceso en segundo plano.
+</span><span class="sc0">                </span><span class="sc9">else</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">solicitudFG</span><span class="sc13">(</span><span class="sc1">COMANDO</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">fg</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0">         </span><span class="sc4">// Solicita ejecujar un proceso en primer plano.
+</span><span class="sc0">                    </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">enBg</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0"> </span><span class="sc1">analizarBG</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'esto dice que puse en &amp;'</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">end</span><span class="sc0">     </span><span class="sc4">// Envía al segundo plano.
+</span><span class="sc0">                        </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                            </span><span class="sc9">if</span><span class="sc0">  </span><span class="sc1">redireccion</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarReDIR</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0">        </span><span class="sc4">// Redirección de la salida estándar.
+</span><span class="sc0">                            </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tuberia</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarPipe</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0">          </span><span class="sc4">// Tubería (pipe).
+</span><span class="sc0">                                </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'CAT'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarCAT</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0">       </span><span class="sc4">// Comando CAT
+</span><span class="sc0">                                    </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'CD'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc4">// Comando CD
+</span><span class="sc0">                                        </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'KILL'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarKILL</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc4">// Comando KILL
+</span><span class="sc0">                                            </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'LS'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarLS</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc4">// Comando LS
+</span><span class="sc0">                                                </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                                                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'PWD'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">analizarPWD</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0">  </span><span class="sc4">//Comando PWD
+</span><span class="sc0">                                                    </span><span class="sc9">else</span><span class="sc0"> 
+                                                        </span><span class="sc9">begin</span><span class="sc0">
+                                                        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">COMANDO</span><span class="sc13">=</span><span class="sc10">'MOO'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">moo</span><span class="sc13">(</span><span class="sc1">ARGUMENTOS</span><span class="sc13">)</span><span class="sc0"> 
+                                                        </span><span class="sc9">else</span><span class="sc0">
+                                                            </span><span class="sc9">begin</span><span class="sc0">
+                                                            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">       </span><span class="sc4">// Comando externo
+</span><span class="sc0">                                                                </span><span class="sc9">Begin</span><span class="sc0">
+                                                                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">analizarEXEC</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                                                                    </span><span class="sc9">begin</span><span class="sc0">
+                                                                    </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">5</span><span class="sc13">);</span><span class="sc0">
+                                                                    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                                                                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">                </span><span class="sc4">//Comando no reconocido.
+</span><span class="sc0">                                                            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarCAT</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">dir2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">strOutPut</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">// Tipo 0: Salida estándar, tipo 1: Redirigir la salida.
+</span><span class="sc0">    </span><span class="sc1">dir1</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">extraerComando</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">                </span><span class="sc4">// se hace reuso de esta funcion debido al analisis sintáctico, se obtiene el directorio del primer archivo
+</span><span class="sc0">    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0"> 
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">dir2</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">;</span><span class="sc0">                        </span><span class="sc4">// se asigna a dir2 la direccion del segundo archivo
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">'/'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">dirActual</span><span class="sc13">+</span><span class="sc10">'/'</span><span class="sc13">+</span><span class="sc1">dir1</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dir2</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dir2</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">'/'</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">dir2</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">dirActual</span><span class="sc13">+</span><span class="sc10">'/'</span><span class="sc13">+</span><span class="sc1">dir2</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">CAT</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dir1</span><span class="sc13">,</span><span class="sc1">dir2</span><span class="sc13">,</span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">DIRECTORIO</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{
+    Nombre: analizarCD.
+    return: -1 si hay error, 0 si se ejecutó con éxito.
+}</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">analizarCD</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">DIRECTORIO</span><span class="sc13">=</span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+        </span><span class="sc1">fpChDir</span><span class="sc13">(</span><span class="sc1">dirHome</span><span class="sc13">)</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">fpChDir</span><span class="sc13">(</span><span class="sc1">DIRECTORIO</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                    </span><span class="sc1">analizarCD</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc9">function</span><span class="sc0"> </span><span class="sc1">analizarEXEC</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">):</span><span class="sc0"> </span><span class="sc1">cint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc2">{
+   Nombre: analizarEXEC.
+   Condición: No se permiten más de 3 parámetros.
+  
+}</span><span class="sc0">
+
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">comando</span><span class="sc0"> </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">aux</span><span class="sc0">     </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">parametros</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tipo</span><span class="sc0">    </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc0">       </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">analizarExec</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">strOutPut</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">comando</span><span class="sc13">:=</span><span class="sc1">extraerComando</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">       </span><span class="sc4">//ENTRADA vuelve sin el comando.
+</span><span class="sc0">        </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">extraerArgumentos</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">);</span><span class="sc0">      </span><span class="sc4">//AUX se le asignan los parámetros de forma -* y ENTRADA contiene cualquier parametro sin la forma -*, como podría ser un directorio
+</span><span class="sc0">        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">fileExists</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc1">comando</span><span class="sc13">:=</span><span class="sc1">FSearch</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,</span><span class="sc1">strpas</span><span class="sc13">(</span><span class="sc1">fpGetenv</span><span class="sc13">(</span><span class="sc10">'PATH'</span><span class="sc13">)));</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">comando</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">      </span><span class="sc4">// Sólo existen parámetros de la forma -*.
+</span><span class="sc0">                    </span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">   </span><span class="sc4">// 0, 1, 2 o 3 parámetros.
+</span><span class="sc0">                            </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[],</span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0"> 
+                            </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                            </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">]],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                            </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">]],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc0">
+                </span><span class="sc9">else</span><span class="sc0">                    </span><span class="sc4">// Existe algún parámetro sin la forma -*, como podría ser un directorio
+</span><span class="sc0">                    </span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">   </span><span class="sc4">// 0, 1, 2 o 3 parámetros + algún directorio o parámetro extra..
+</span><span class="sc0">                            </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">ENTRADA</span><span class="sc13">],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                            </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">ENTRADA</span><span class="sc13">],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                            </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">],</span><span class="sc1">ENTRADA</span><span class="sc13">],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                            </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">EXEC</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">,[</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">],</span><span class="sc1">aux</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">],</span><span class="sc1">ENTRADA</span><span class="sc13">],</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc1">analizarExec</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarKILL</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+   Nombre: analizarKILL.
+   Condición: Deben pasarse dos parámetros, sin excepción. Forma: kill -n_signal pid
+}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">argumentos</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">parametros</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">proc</span><span class="sc13">,</span><span class="sc1">signal</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">err</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">argumentos</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">extraerArgumentos</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">);</span><span class="sc0">          </span><span class="sc4">//se separan la señal y el pid recibidos (pid en entrada)
+</span><span class="sc0">    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">                                      </span><span class="sc4">//verifica que se pase sólo 1 señal
+</span><span class="sc0">        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">8</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0"> 
+    </span><span class="sc9">else</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">val</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">],</span><span class="sc1">signal</span><span class="sc13">,</span><span class="sc1">err</span><span class="sc13">);</span><span class="sc0">                      </span><span class="sc4">//se asigna a signal el numero de señal recibido   
+</span><span class="sc0">        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">err</span><span class="sc13">&lt;&gt;</span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">9</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc0"> 
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">val</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">proc</span><span class="sc13">,</span><span class="sc1">err</span><span class="sc13">);</span><span class="sc0">                          </span><span class="sc4">//se asigna a signal el numero de señal recibido   
+</span><span class="sc0">                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">err</span><span class="sc13">&lt;&gt;</span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">9</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc0"> 
+                </span><span class="sc9">else</span><span class="sc0"> 
+                    </span><span class="sc1">KILL</span><span class="sc13">(</span><span class="sc1">signal</span><span class="sc13">,</span><span class="sc1">proc</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarLS</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+   Nombre: analizarLS.
+   Opciones: Puede haber 0, 1, 2 o 3 parámetros identificados con un guión &lt;-&gt;
+             y pueden estar en cualquier orden. Estos son &lt;-a&gt;, &lt;-f&gt;, &lt;-l&gt;.
+             Puede haber o no 1 argumento que indique la ruta desde la cual
+             trabajar, luego de los parámetros comenzados con guión.
+}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> 
+    </span><span class="sc1">directorio</span><span class="sc13">,</span><span class="sc1">cad</span><span class="sc13">,</span><span class="sc1">dirBase</span><span class="sc0">  </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc0">                     </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">argumentos</span><span class="sc0">              </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">parametros</span><span class="sc13">;</span><span class="sc0">
+    
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">dirBase</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">dirActual</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">argumentos</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">extraerArgumentos</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc13">:=</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+        </span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc1">j</span><span class="sc13">]:=</span><span class="sc1">upcase</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc1">j</span><span class="sc13">]);</span><span class="sc0">
+    </span><span class="sc1">directorio</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">
+    </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0">      </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">)</span><span class="sc0">      </span><span class="sc4">//si existe el directorio se lo prepara para cd
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dirBase</span><span class="sc13">);</span><span class="sc0">        </span><span class="sc4">//si no existe se usará el directorio actual
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">cad</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">         </span><span class="sc4">//se posiciona en el directorio y verifica la salida
+</span><span class="sc0">                </span><span class="sc1">ls</span><span class="sc13">(</span><span class="sc1">false</span><span class="sc13">,</span><span class="sc1">false</span><span class="sc13">,</span><span class="sc1">false</span><span class="sc13">)</span><span class="sc0">           </span><span class="sc4">//sí = 0 se posicionó bien y ejecuta ls
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc0">                         </span><span class="sc4">//si &lt;&gt; 0 el directorio recibido no es coherente.
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            
+    </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0">      </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+                </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">8</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">)</span><span class="sc0">      </span><span class="sc4">//si existe el directorio se lo prepara para cd
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dirBase</span><span class="sc13">);</span><span class="sc0">        </span><span class="sc4">//si no existe se usará el directorio actual
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">cad</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">         </span><span class="sc4">//se posiciona en el directorio y verifica la salida
+</span><span class="sc0">                </span><span class="sc1">ls</span><span class="sc13">(</span><span class="sc0">                             </span><span class="sc4">//si = 0 se posicionó bien y ejecuta ls
+</span><span class="sc0">                    </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">,</span><span class="sc0">  </span><span class="sc4">//verifica si el argumento contiene el parametro 'A'
+</span><span class="sc0">                    </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">,</span><span class="sc0">  </span><span class="sc4">//verifica si el argumento contiene el parametro 'F'
+</span><span class="sc0">                    </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0">  </span><span class="sc4">//verifica si el argumento contiene el parametro 'L'
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc0">                         </span><span class="sc4">//si &lt;&gt; 0 el directorio recibido no es coherente.
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            
+    </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc0">      </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">  
+                </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">8</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">)</span><span class="sc0">      </span><span class="sc4">//si existe el directorio se lo prepara para cd
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dirBase</span><span class="sc13">);</span><span class="sc0">        </span><span class="sc4">//si no existe se usará el directorio actual
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">cad</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">         </span><span class="sc4">//se posiciona en el directorio y verifica la salida
+</span><span class="sc0">                </span><span class="sc1">ls</span><span class="sc13">(</span><span class="sc0">                             </span><span class="sc4">//sí = 0 se posicionó bien y ejecuta ls
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)),</span><span class="sc0">   </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'A'
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)),</span><span class="sc0">   </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'F'
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)))</span><span class="sc0">   </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'L'
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    
+                </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">                    </span><span class="sc4">//si &lt;&gt; 0 el directorio recibido no es coherente.
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            
+    </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc0">      </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">paramValido</span><span class="sc13">(</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">]))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">   
+                </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">8</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">)</span><span class="sc0">      </span><span class="sc4">//si existe el directorio se lo prepara para cd
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc1">cad</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">dirBase</span><span class="sc13">);</span><span class="sc0">        </span><span class="sc4">//si no existe se usará el directorio actual
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">cad</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">         </span><span class="sc4">//se posiciona en el directorio y verifica la salida
+</span><span class="sc0">                </span><span class="sc1">ls</span><span class="sc13">(</span><span class="sc0">                             </span><span class="sc4">//si = 0 se posicionó bien y ejecuta ls
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'A'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)),</span><span class="sc0">    </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'A'
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'F'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)),</span><span class="sc0">    </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'F'
+</span><span class="sc0">                    </span><span class="sc13">((</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">1</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">2</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">'L'</span><span class="sc13">,</span><span class="sc1">argumentos</span><span class="sc13">[</span><span class="sc7">3</span><span class="sc13">])&lt;&gt;</span><span class="sc7">0</span><span class="sc13">)))</span><span class="sc0">    </span><span class="sc4">//verifica si alguno de los argumentos contiene el parametro 'L'
+</span><span class="sc0">            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">                        </span><span class="sc4">//si &lt;&gt; 0 el directorio recibido no es coherente.
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0"> 
+    </span><span class="sc1">analizarCD</span><span class="sc13">(</span><span class="sc1">dirBase</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarPWD</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+   Nombre: analizarPWD.
+   
+}</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">strOutPut</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">    </span><span class="sc4">// Tipo 0: Salida estándar, tipo 1: Redirigir la salida.
+</span><span class="sc0">    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">[</span><span class="sc7">0</span><span class="sc13">]</span><span class="sc0"> </span><span class="sc13">&gt;=</span><span class="sc0"> </span><span class="sc12">#4</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">flagInPut</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">2</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">pwd</span><span class="sc13">(</span><span class="sc1">tipo</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarReDIR</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">comando</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">salida</span><span class="sc13">,</span><span class="sc1">respaldo</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">salidaRuta</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">' &gt; '</span><span class="sc13">,</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">   </span><span class="sc4">// &gt; rewrite (reescribe el archivo, lo crea si no existe).
+</span><span class="sc0">            </span><span class="sc1">salidaRuta</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">+</span><span class="sc7">3</span><span class="sc13">,</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">));</span><span class="sc0">
+            </span><span class="sc1">comando</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc1">salida</span><span class="sc13">,</span><span class="sc1">salidaRuta</span><span class="sc13">,</span><span class="sc1">ok</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">ok</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">11</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">respaldarSalidaEstandar</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc1">salida</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">close</span><span class="sc13">(</span><span class="sc1">salida</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">restaurarStdOut</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">j</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">' &gt;&gt; '</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">   </span><span class="sc4">// &gt;&gt; append (añade los datos al final del archivo).
+</span><span class="sc0">                </span><span class="sc1">salidaRuta</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc13">+</span><span class="sc7">4</span><span class="sc13">,</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">));</span><span class="sc0">
+                </span><span class="sc1">comando</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">agregarArchivo</span><span class="sc13">(</span><span class="sc1">salida</span><span class="sc13">,</span><span class="sc1">salidaRuta</span><span class="sc13">,</span><span class="sc1">ok</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">ok</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">Mostrarerror</span><span class="sc13">(</span><span class="sc7">12</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">respaldarSalidaEstandar</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc1">salida</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc1">comando</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">restaurarStdOut</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarPipe</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">preString</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">postString</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">respaldo</span><span class="sc13">,</span><span class="sc1">commandPipe</span><span class="sc13">:</span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">ok</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">' | '</span><span class="sc13">,</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">preString</span><span class="sc0">   </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">postString</span><span class="sc0">  </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">+</span><span class="sc7">3</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">));</span><span class="sc0">
+    </span><span class="sc1">crearArchivo</span><span class="sc13">(</span><span class="sc1">commandPipe</span><span class="sc13">,</span><span class="sc10">'commandPipe'</span><span class="sc13">,</span><span class="sc1">ok</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">ok</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">13</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">popen</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">commandPipe</span><span class="sc13">,</span><span class="sc1">postString</span><span class="sc13">,</span><span class="sc10">'W'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">respaldarSalidaEstandar</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">redirigirSalidaEstandar</span><span class="sc13">(</span><span class="sc1">commandPipe</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc1">preString</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">restaurarStdOut</span><span class="sc13">(</span><span class="sc1">respaldo</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">Pclose</span><span class="sc13">(</span><span class="sc1">commandPipe</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">deletefile</span><span class="sc13">(</span><span class="sc10">'commandPipe'</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">analizarBG</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">i</span><span class="sc13">:</span><span class="sc1">word</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">alBG</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">i</span><span class="sc13">:=</span><span class="sc1">pos</span><span class="sc13">(</span><span class="sc10">' &amp;'</span><span class="sc13">,</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">ENTRADA</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc1">i</span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">END</span><span class="sc13">.</span><span class="sc0">
+</span></div></body>
+</html>

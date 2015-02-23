@@ -1,33 +1,33 @@
 unit ALR;
 
-interface
+INTERFACE
 
-uses baseUnix, Unix, Linux, errors,sysutils,utilidades;
+	uses 
+		baseUnix, Unix, Linux, errors,sysutils,utilidades;
 
+	type 
+		puntero=^nodo;
 
-type puntero=^nodo;
-
-	 t_procesos=record
-		nombre:string;
-		prioridad:string;
-		numero:longint;
-		directorio:string;
-		estado:string;
-		pid:longint;
-		end;
-		
-	 nodo=record
-			info:t_procesos;
-			sig:puntero;
-			end;
+		t_procesos=	record
+					nombre:string;
+					prioridad:string;
+					numero:longint;
+					directorio:string;
+					estado:string;
+					pid:longint;
+					end;
 			
-	 tabla=record
-			cab:puntero;
-			tam:word;
-			indice: word;
-			end;
-var
-
+		nodo=	record
+				info:t_procesos;
+				sig:puntero;
+				end;
+				
+		tabla=	record
+				cab:puntero;
+				tam:word;
+				indice: word;
+				end;
+	var
 		alBG: boolean;				// El programa debe ejecutarse en bg.
 		tablaJobs: Tabla;			// Tabla de tareas activas.
 		pidEnEjec: longint;			// PID del proceso en primer plano.
@@ -40,8 +40,7 @@ procedure redirigirSalidaEstandar(var arch:text);
 procedure respaldarSalidaEstandar(var respaldo:text);
 procedure restaurarStdOut(var arch:text);
 
-(*-----------------------------------------------------------------------------------*)
-
+{-----------------------------------------------------------------------------------}
 
 function AnalizarEstado(pid:longint;estado:longint):string;
 function procesoFinalizado(estado:longint):boolean;
@@ -54,7 +53,7 @@ Procedure SIGINT_Recibida(sig : cint);cdecl;
 procedure SIGCHLD_Recibida(signal: LongInt; info: psiginfo; context: PSigContext);
 procedure instalarManejadores;
 
-(*-----------------------------------------------------------------------------------*)
+{-----------------------------------------------------------------------------------}
 
 procedure crearTabla;
 procedure insertarEnTabla (x:t_procesos);
@@ -69,7 +68,7 @@ function encontrarProceso (numeroProceso: longint):t_procesos;
 function MostrarUno(X:T_procesos):string;
 
 
-implementation
+IMPLEMENTATION
 
 
 Procedure SIGTSTP_Recibida(sig : cint);cdecl;
@@ -264,7 +263,7 @@ end;
 
 
 
-(*-----------------------------------------------------------------------------------*)
+{-----------------------------------------------------------------------------------}
 
 procedure agregarArchivo(var arch: text; filename:string; var ok:boolean);
 begin
@@ -333,7 +332,7 @@ begin
 end;
 
 
-(*-----------------------------------------------------------------------------------*)
+{-----------------------------------------------------------------------------------}
 
 function asString(V:longint):string;
 {Convierte un número en una cadena}
@@ -457,9 +456,9 @@ end;
 function MostrarUno(X:T_procesos):string;
 {Muestra la información de un elemento proceso de la tablaJobs}
 begin
-
-MostrarUno:='['+(asString(x.numero))+']'+x.prioridad+espacio(7-length(asString(x.numero)))+x.estado+espacio(16-length(x.estado))+x.nombre+espacio(5)+'('+(asString(x.pid))+')';
-
+MostrarUno:=
+	'['+(asString(x.numero))+']'+x.prioridad+espacio(7-length(asString(x.numero)))+
+	x.estado+espacio(16-length(x.estado))+x.nombre+espacio(5)+'('+(asString(x.pid))+')';
 end;
 
 

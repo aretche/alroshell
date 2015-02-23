@@ -1,11 +1,14 @@
 UNIT analizador;
+
 INTERFACE
-	Uses  errors,ALR, comandos, utilidades, unix, baseunix, sysutils;	
+
+	Uses  
+		errors, ALR, comandos, utilidades, unix, baseunix, sysutils;	
 	
 function analizar		(var ENTRADA: string): boolean;		// Analiza la cadena introducida por el usuario.
-procedure analizarCAT	(var ENTRADA: string);				// Analiza la cadena para ejecutar el comando CAT.
 function analizarCD		(DIRECTORIO: string): cint;			// Analiza la cadena para ejecutar el comando CD.
 function analizarEXEC	(var ENTRADA:string): cint;			// Analiza la cadena para ejecutar el comando EXEC.
+procedure analizarCAT	(var ENTRADA: string);				// Analiza la cadena para ejecutar el comando CAT.
 procedure analizarKILL	(var ENTRADA: string);				// Analiza la cadena para ejecutar el comando KILL.
 procedure analizarLS	(var ENTRADA: string);				// Analiza la cadena para ejecutar el comando LS.
 procedure analizarPWD	(var ENTRADA: string);				// Analiza la cadena para ejecutar el comando PWD.
@@ -17,7 +20,7 @@ procedure analizarBG	(var ENTRADA: string);				// Analiza la cadena si presenta 
 IMPLEMENTATION
 
 function analizar(var ENTRADA: string): boolean;
-var COMANDO, ARGUMENTOS:string;
+var COMANDO, ARGUMENTOS: string;
 Begin
 	analizar := true;
 	COMANDO	:= extraerComando(ENTRADA);			//se extrae el comando para el case
@@ -27,7 +30,6 @@ Begin
 	ELSE
 		ENTRADA := COMANDO;
 	COMANDO	:=upcase(COMANDO);
-
 	if COMANDO='EXIT' then analizar:= false		// Salir del programa.
 	else 
 		begin
@@ -176,9 +178,7 @@ procedure analizarKILL(var ENTRADA: string);
 {
    Nombre: analizarKILL.
    Condición: Deben pasarse dos parámetros, sin excepción. Forma: kill -n_signal pid
-  
 }
-
 var argumentos: parametros;
 	proc,signal: longint;
 	i: integer;
@@ -217,9 +217,7 @@ procedure analizarLS(var ENTRADA: string);
 			 y pueden estar en cualquier orden. Estos son <-a>, <-f>, <-l>.
 			 Puede haber o no 1 argumento que indique la ruta desde la cual
 			 trabajar, luego de los parámetros comenzados con guión.
-  
 }
-
 var 
 	directorio,cad,dirBase	: string;
 	i,j						: integer;

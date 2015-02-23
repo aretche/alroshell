@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Codigo Fuente de: ALROShell.pas</title>
+<style type="text/css">
+body {background-color:black}
+span {
+	font-family: 'Courier New';
+	font-size: 9pt;
+	color: #FFFFFF;
+}
+.sc0 {
+}
+.sc1 {
+	font-style: italic;
+	color: #00FF40;
+}
+.sc2 {
+	font-style: italic;
+	color: #0080FF;
+}
+.sc4 {
+	color: #FF00FF;
+}
+.sc7 {
+	color: #FFFF00;
+}
+.sc9 {
+	color: #808080;
+}
+.sc10 {
+	color: #FF8040;
+}
+.sc13 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #000000; "><span class="sc2">{
+    ALROShell.pp
+
+    Copyright 2015 
+    * Ramiro Rivera                 &lt;ramarivera@gmail.com&gt;, 
+    * David lazbal                  &lt;davidlazbal@gmail.com&gt;, 
+    * Matín Arrúa                 &lt;martin94.profugo@gmail.com&gt;.
+    
+    Copyright 2014 
+    * Fernando Gómez Albornoz      &lt;fgalbornoz07@gmail.com&gt;.
+
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+    MA 02110-1301, USA.
+}</span><span class="sc0">
+
+</span><span class="sc9">Program</span><span class="sc0"> </span><span class="sc1">ALROShell</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Uses</span><span class="sc0"> </span><span class="sc1">BaseUnix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">sysutils</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">unix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">comandos</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">analizador</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">utilidades</span><span class="sc13">,</span><span class="sc1">ALR</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">salir</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">boolean</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">Begin</span><span class="sc0">
+</span><span class="sc1">pidEnEjec</span><span class="sc13">:=-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">                  </span><span class="sc4">//Inicializacion 
+</span><span class="sc1">instalarManejadores</span><span class="sc13">;</span><span class="sc0">            </span><span class="sc4">//Instalacion de manejadores de seniales
+</span><span class="sc1">crearTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">space</span><span class="sc13">(</span><span class="sc7">15</span><span class="sc13">)+</span><span class="sc10">'Bienvenido a ALROShell           -Copyright 2013-2015-'</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc1">salir</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">                  </span><span class="sc4">// Break del ciclo repeat.                      
+</span><span class="sc0">    </span><span class="sc9">repeat</span><span class="sc0">
+        </span><span class="sc1">alBG</span><span class="sc13">:=</span><span class="sc1">false</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">CR</span><span class="sc13">,</span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">TimeToStr</span><span class="sc13">(</span><span class="sc1">Time</span><span class="sc13">),</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc7">5</span><span class="sc13">),</span><span class="sc10">' '</span><span class="sc13">,</span><span class="sc1">fpGetEnv</span><span class="sc13">(</span><span class="sc10">'USER'</span><span class="sc13">),</span><span class="sc10">'# '</span><span class="sc13">);</span><span class="sc0">  </span><span class="sc4">// Fecha y usuario (prompt)
+</span><span class="sc0">        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">strSin</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">,</span><span class="sc1">dirHome</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc13">&lt;=</span><span class="sc0"> </span><span class="sc7">20</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">Begin</span><span class="sc0">
+                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">dirHome</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc1">dirHome</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'~'</span><span class="sc13">,</span><span class="sc1">strSin</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">,</span><span class="sc1">dirHome</span><span class="sc13">),</span><span class="sc10">' '</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc4">// Directorio (prompt)
+</span><span class="sc0">                </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'~'</span><span class="sc13">,</span><span class="sc1">dirActual</span><span class="sc13">,</span><span class="sc10">' '</span><span class="sc13">);</span><span class="sc0">                                                               </span><span class="sc4">// Directorio (prompt)
+</span><span class="sc0">            </span><span class="sc9">end</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'~/...'</span><span class="sc13">,</span><span class="sc1">rightStr</span><span class="sc13">(</span><span class="sc1">strSin</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">,</span><span class="sc1">dirHome</span><span class="sc13">),</span><span class="sc7">20</span><span class="sc13">),</span><span class="sc10">' '</span><span class="sc13">);</span><span class="sc0">                                   </span><span class="sc4">// Directorio (prompt)
+</span><span class="sc0">        </span><span class="sc1">readln</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">limpiarTabla</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc13">(</span><span class="sc1">analizar</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">salir</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc1">salir</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc1">true</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Esta shell no tiene Poderes de Super Vaca'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'(O si los tiene?)'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">.</span><span class="sc0">
+</span></div></body>
+</html>

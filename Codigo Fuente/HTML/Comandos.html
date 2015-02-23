@@ -1,0 +1,516 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=UTF-8">
+<title>Codigo Fuente de: Comandos.pas</title>
+<style type="text/css">
+body {background-color:black}
+span {
+	font-family: 'Courier New';
+	font-size: 9pt;
+	color: #FFFFFF;
+}
+.sc0 {
+}
+.sc1 {
+	font-style: italic;
+	color: #00FF40;
+}
+.sc2 {
+	font-style: italic;
+	color: #0080FF;
+}
+.sc4 {
+	color: #FF00FF;
+}
+.sc5 {
+	font-weight: bold;
+	color: #00FFFF;
+}
+.sc7 {
+	color: #FFFF00;
+}
+.sc9 {
+	color: #808080;
+}
+.sc10 {
+	color: #FF8040;
+}
+.sc13 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #000000; "><span class="sc9">UNIT</span><span class="sc0"> </span><span class="sc1">comandos</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">INTERFACE</span><span class="sc0">
+
+</span><span class="sc9">Uses</span><span class="sc0"> 
+    </span><span class="sc1">BaseUnix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">Unix</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">utilidades</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">users</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">ALR</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">cat</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc13">,</span><span class="sc1">dir2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">                        </span><span class="sc4">// CAT - Concatena hasta dos archivos, o un archivo con la salida estandar
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">exec</span><span class="sc0">  </span><span class="sc13">(</span><span class="sc1">param1</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">String</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">param2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">Array</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0"> </span><span class="sc1">AnsiString</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">   </span><span class="sc4">// EXEC - Ejecuta un programa externo. Ruta relativa o absoluta.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">kill</span><span class="sc0">  </span><span class="sc13">(</span><span class="sc1">signal</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">proc</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">);</span><span class="sc0">                                    </span><span class="sc4">// KILL - Envía una señal a un proceso.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">ls</span><span class="sc0">    </span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">,</span><span class="sc1">modoL</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">                                </span><span class="sc4">// LS - Lista los archivos de un determinado directorio.                            
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">pwd</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">                                               </span><span class="sc4">// PWD - Muestra el directorio actual de trabajo.
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">bg</span><span class="sc0">    </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">                                           </span><span class="sc4">// BG - Envia trabajo a segundo plano
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">fg</span><span class="sc0">    </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">                                           </span><span class="sc4">// FG - Envia trabajo al primer plano
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">jobs</span><span class="sc13">;</span><span class="sc0">                                                             </span><span class="sc4">// JOBS - Muestra tabla de trabajos
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">help</span><span class="sc13">;</span><span class="sc0">                                                             </span><span class="sc4">// HELP - Muestra una pantalla de ayuda
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">moo</span><span class="sc0">   </span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">                                           </span><span class="sc4">// MOO - Linux users knows ;)
+</span><span class="sc0">
+
+</span><span class="sc9">IMPLEMENTATION</span><span class="sc0">
+
+
+</span><span class="sc4">//Comando CAT
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">cat</span><span class="sc13">(</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">dir1</span><span class="sc13">,</span><span class="sc1">dir2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">f1</span><span class="sc13">,</span><span class="sc1">f2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">text</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">texto</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc5">{$I-}</span><span class="sc0">       </span><span class="sc4">// Evita generar código de control de entrada/salida en el programa
+</span><span class="sc0">    </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">f1</span><span class="sc13">,</span><span class="sc1">dir1</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">reset</span><span class="sc13">(</span><span class="sc1">f1</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">IOResult</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">   
+        </span><span class="sc1">Mostrarerror</span><span class="sc13">(</span><span class="sc7">10</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">   
+        </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">eof</span><span class="sc13">(</span><span class="sc1">f1</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">readln</span><span class="sc13">(</span><span class="sc1">f1</span><span class="sc13">,</span><span class="sc1">texto</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">texto</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">stdOutPut</span><span class="sc13">,</span><span class="sc1">texto</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">close</span><span class="sc13">(</span><span class="sc1">f1</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">dir2</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">''</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">assign</span><span class="sc13">(</span><span class="sc1">f2</span><span class="sc13">,</span><span class="sc1">dir2</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">reset</span><span class="sc13">(</span><span class="sc1">f2</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">IOResult</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc9">begin</span><span class="sc0">   
+            </span><span class="sc1">Mostrarerror</span><span class="sc13">(</span><span class="sc7">10</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc9">while</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">eof</span><span class="sc13">(</span><span class="sc1">f2</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">readln</span><span class="sc13">(</span><span class="sc1">f2</span><span class="sc13">,</span><span class="sc1">texto</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">texto</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">stdOutPut</span><span class="sc13">,</span><span class="sc1">texto</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc1">close</span><span class="sc13">(</span><span class="sc1">f2</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc5">{$I+}</span><span class="sc0">       </span><span class="sc4">// Habilita la generación de código de entrada/salida
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc4">//Comando CD
+</span><span class="sc2">{
+    El comando CD es ejecutado directamente
+    por el analizadorCD en la UNIT analizador
+}</span><span class="sc0">
+
+</span><span class="sc4">//Comando EXEC
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">exec</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">param1</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">String</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">param2</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">Array</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0"> </span><span class="sc1">AnsiString</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">pidP</span><span class="sc13">,</span><span class="sc1">op</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc1">proceso</span><span class="sc13">:</span><span class="sc1">t_procesos</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">op</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">pidP</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">fpfork</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">pidP</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">
+        </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">Mostrarerror</span><span class="sc13">(</span><span class="sc7">3</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">Begin</span><span class="sc0">   
+                </span><span class="sc1">fpExecLE</span><span class="sc13">(</span><span class="sc1">param1</span><span class="sc13">,</span><span class="sc1">param2</span><span class="sc13">,</span><span class="sc1">envp</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0"> 
+            </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc9">with</span><span class="sc0"> </span><span class="sc1">proceso</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">numero</span><span class="sc13">:=</span><span class="sc1">TablaJobs</span><span class="sc13">.</span><span class="sc1">Indice</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">nombre</span><span class="sc13">:=</span><span class="sc1">nombreComandoDesdeRuta</span><span class="sc13">(</span><span class="sc1">param1</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc1">pid</span><span class="sc13">:=</span><span class="sc1">pidP</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">estado</span><span class="sc13">:=</span><span class="sc10">'Corriendo'</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">prioridad</span><span class="sc13">:=</span><span class="sc10">' '</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">directorio</span><span class="sc13">:=</span><span class="sc1">param1</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">alBG</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">proceso</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">:=</span><span class="sc1">proceso</span><span class="sc13">.</span><span class="sc1">estado</span><span class="sc13">+</span><span class="sc10">' &amp;'</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">insertarEnTabla</span><span class="sc13">(</span><span class="sc1">proceso</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc1">fpWaitPid</span><span class="sc13">(</span><span class="sc1">pidP</span><span class="sc13">,</span><span class="sc1">op</span><span class="sc13">,</span><span class="sc1">WNOHANG</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//No "Espera" por el hijo con pid=PidP
+</span><span class="sc0">                    </span><span class="sc9">end</span><span class="sc0">
+                </span><span class="sc9">else</span><span class="sc0">
+                    </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">pidenejec</span><span class="sc13">:=</span><span class="sc1">pidP</span><span class="sc13">;</span><span class="sc0">        </span><span class="sc4">// Cargo el pid del nuevo programa como en ejecucion actual
+</span><span class="sc0">                    </span><span class="sc1">fpWaitPid</span><span class="sc13">(</span><span class="sc1">pidP</span><span class="sc13">,</span><span class="sc1">op</span><span class="sc13">,</span><span class="sc7">0</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Espera por el hijo con pid=PidP
+</span><span class="sc0">                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc9">not</span><span class="sc0"> </span><span class="sc1">procesoFinalizado</span><span class="sc13">(</span><span class="sc1">op</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                        </span><span class="sc1">insertarEnTabla</span><span class="sc13">(</span><span class="sc1">proceso</span><span class="sc13">);</span><span class="sc0">
+                    </span><span class="sc1">pidenejec</span><span class="sc13">:=-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">      </span><span class="sc4">//borro el pid asignado antes
+</span><span class="sc0">                    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc4">//Comando KILL
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">kill</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">signal</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">proc</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">fpKill</span><span class="sc13">(</span><span class="sc1">proc</span><span class="sc13">,</span><span class="sc1">signal</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc4">//Comando LS
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">ls</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">,</span><span class="sc1">modoL</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+    Segun los parametros booleanos distingue entre dos tipos de LS
+    y dentro de los mismos actua acorde a dichas variables
+}</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+</span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">modoL</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc1">lsL</span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">,</span><span class="sc1">modoL</span><span class="sc13">)</span><span class="sc0">
+</span><span class="sc9">else</span><span class="sc0">
+    </span><span class="sc1">lsAF</span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">lsAF</span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+    Los archivos marcados como inaccesibles son aquellos 
+    en los cuales fpStat devuelve un error. En dicho caso se puede saber
+    el nombre del archivo, pero no datos referidos al tipo de archivo.
+
+}</span><span class="sc0">
+
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">directorio</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">pdir</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">entrada</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">PDirent</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">vector</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">vDirent</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">indice</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">K</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">info</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">stat</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">auxNombre</span><span class="sc13">,</span><span class="sc1">tipo</span><span class="sc0">  </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">k</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">;</span><span class="sc1">tipo</span><span class="sc13">:=</span><span class="sc10">''</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">indice</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">fpOpenDir</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0">  </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0">   </span><span class="sc4">//openDir
+</span><span class="sc0">    </span><span class="sc9">repeat</span><span class="sc0">
+        </span><span class="sc1">entrada</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">fpReadDir</span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">^);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc13">^.</span><span class="sc1">d_name</span><span class="sc13">[</span><span class="sc7">0</span><span class="sc13">]</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">'.'</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc4">//Si  mostrarTodos (ModoA) o no Oculto, lo carga al vector de directorio
+</span><span class="sc0">            </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">indice</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">indice</span><span class="sc13">]:=</span><span class="sc0"> </span><span class="sc1">entrada</span><span class="sc13">^;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc1">entrada</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">modoA</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc4">// si ModoA ordena el directorio alfabeticamente
+</span><span class="sc0">        </span><span class="sc1">burbujaDirent</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">,</span><span class="sc1">indice</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">J</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+        </span><span class="sc9">Begin</span><span class="sc0"> </span><span class="sc4">//for
+</span><span class="sc0">        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">fpStat</span><span class="sc13">(</span><span class="sc1">pchar</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">),</span><span class="sc1">info</span><span class="sc13">)=</span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc9">Begin</span><span class="sc0">  </span><span class="sc4">//fpStat         
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">modoA</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">tipo</span><span class="sc13">:=</span><span class="sc1">tipoArchivoAF</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_mode</span><span class="sc13">)+</span><span class="sc10">' '</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">auxNombre</span><span class="sc13">:=</span><span class="sc1">tipo</span><span class="sc13">+</span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc7">20</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">K</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0"> </span><span class="sc4">//case
+</span><span class="sc0">            </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0"> 
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">     
+                        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                    </span><span class="sc9">else</span><span class="sc0"> 
+                        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> 
+                        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                    </span><span class="sc9">else</span><span class="sc0"> 
+                        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">// case
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">k</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">3</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">k</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">K</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">End</span><span class="sc0"> </span><span class="sc4">// fpStat
+</span><span class="sc0">        </span><span class="sc9">else</span><span class="sc0"> 
+        </span><span class="sc9">Begin</span><span class="sc0"> </span><span class="sc4">// else fpStat
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">modoA</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc1">tipo</span><span class="sc13">:=</span><span class="sc1">tipoArchivoAF</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_mode</span><span class="sc13">)+</span><span class="sc10">' '</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc1">auxNombre</span><span class="sc13">:=</span><span class="sc1">tipo</span><span class="sc13">+</span><span class="sc1">copy</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">,</span><span class="sc7">1</span><span class="sc13">,</span><span class="sc7">20</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">K</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0"> </span><span class="sc4">//case
+</span><span class="sc0">            </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0"> 
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'Inaccesible: '</span><span class="sc13">+</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                    </span><span class="sc9">else</span><span class="sc0"> 
+                        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Inaccesible: '</span><span class="sc13">+</span><span class="sc1">auxNombre</span><span class="sc13">);</span><span class="sc0"> 
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">j</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'Inaccesible: '</span><span class="sc13">+</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                    </span><span class="sc9">else</span><span class="sc0"> 
+                        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Inaccesible: '</span><span class="sc13">+</span><span class="sc1">auxNombre</span><span class="sc13">)</span><span class="sc0"> 
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc0">  </span><span class="sc9">begin</span><span class="sc0">
+                    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Inaccesible: '</span><span class="sc13">+</span><span class="sc1">auxNombre</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">24</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">auxNombre</span><span class="sc13">)))</span><span class="sc0">
+                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">//case
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">k</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">3</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc1">k</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">K</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">// else fpStat
+</span><span class="sc0">    </span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">// for
+</span><span class="sc0">    </span><span class="sc1">fpCloseDir</span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">^);</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc0">  </span><span class="sc4">// OpenDir
+</span><span class="sc0">    </span><span class="sc9">else</span><span class="sc0"> 
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">        
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc4">//comando LS -l
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">lsL</span><span class="sc13">(</span><span class="sc1">modoA</span><span class="sc13">,</span><span class="sc1">modoF</span><span class="sc13">,</span><span class="sc1">modoL</span><span class="sc13">:</span><span class="sc1">boolean</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc2">{
+    En caso de falla obteniendo los datos de un archivo se mostrará 
+    el mensaje "No se pudo mostrar.", que representa una falla en fpStat.
+    
+}</span><span class="sc0">
+
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">directorio</span><span class="sc0">  </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">Pdir</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">entrada</span><span class="sc0">     </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">PDirent</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">info</span><span class="sc0">        </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">stat</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">vector</span><span class="sc0">      </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">vDirent</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">contArchivos</span><span class="sc13">,</span><span class="sc1">loop</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">indice</span><span class="sc13">,</span><span class="sc1">j</span><span class="sc0">    </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">integer</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tamString</span><span class="sc13">,</span><span class="sc1">unidad</span><span class="sc0">    </span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">tamanio</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">int64</span><span class="sc13">;</span><span class="sc0">
+    
+</span><span class="sc9">Begin</span><span class="sc0"> 
+    </span><span class="sc1">indice</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">contArchivos</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">   </span><span class="sc4">//número de archivos listados
+</span><span class="sc0">    </span><span class="sc1">directorio</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">fpOpenDir</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">directorio</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+    </span><span class="sc9">begin</span><span class="sc0"> </span><span class="sc4">//openDir
+</span><span class="sc0">        </span><span class="sc9">repeat</span><span class="sc0">
+            </span><span class="sc1">entrada</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">fpReadDir</span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">^);</span><span class="sc0">
+            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">and</span><span class="sc0"> </span><span class="sc13">((</span><span class="sc1">modoA</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc9">or</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc13">^.</span><span class="sc1">d_name</span><span class="sc13">[</span><span class="sc7">0</span><span class="sc13">]</span><span class="sc0"> </span><span class="sc13">&lt;&gt;</span><span class="sc0"> </span><span class="sc10">'.'</span><span class="sc13">))</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc4">//Si  mostrarTodos (ModoA) o no Oculto, lo carga al vector de directorio
+</span><span class="sc0">            </span><span class="sc9">Begin</span><span class="sc0">   
+                </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">indice</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">indice</span><span class="sc13">]:=</span><span class="sc0"> </span><span class="sc1">entrada</span><span class="sc13">^;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">    
+        </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc1">entrada</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc9">nil</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">modoA</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc4">// si ModoA ordena el directorio alfabeticamente
+</span><span class="sc0">            </span><span class="sc1">burbujaDirent</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">J</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">indice</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+            </span><span class="sc9">begin</span><span class="sc0"> </span><span class="sc4">//for
+</span><span class="sc0">            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">fpStat</span><span class="sc13">(</span><span class="sc1">pchar</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">),</span><span class="sc1">info</span><span class="sc13">)=</span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                </span><span class="sc9">Begin</span><span class="sc0"> </span><span class="sc4">//fpStat
+</span><span class="sc0">                    </span><span class="sc1">contArchivos</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc1">contArchivos</span><span class="sc0"> </span><span class="sc13">+</span><span class="sc0"> </span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">tamanio</span><span class="sc13">:=</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_size</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">modoACadena</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_mode</span><span class="sc13">));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">permisosACadena</span><span class="sc13">(</span><span class="sc1">pchar</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">)));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">tamAsString</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_nlink</span><span class="sc13">,</span><span class="sc7">2</span><span class="sc13">),</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">1</span><span class="sc13">));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">getusername</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_uid</span><span class="sc13">)+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">2</span><span class="sc13">));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">getgroupname</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_gid</span><span class="sc13">)+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">1</span><span class="sc13">));</span><span class="sc0">
+    
+                    </span><span class="sc1">loop</span><span class="sc13">:=</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">tamanio</span><span class="sc0"> </span><span class="sc9">div</span><span class="sc0"> </span><span class="sc7">1024</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">&gt;</span><span class="sc0"> </span><span class="sc7">1000</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                        </span><span class="sc9">begin</span><span class="sc0">
+                        </span><span class="sc9">repeat</span><span class="sc0">
+                            </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">tamanio</span><span class="sc0"> </span><span class="sc9">div</span><span class="sc0"> </span><span class="sc7">1024</span><span class="sc13">)</span><span class="sc0"> </span><span class="sc13">&gt;</span><span class="sc0"> </span><span class="sc7">1000</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+                                </span><span class="sc9">begin</span><span class="sc0">
+                                </span><span class="sc1">tamanio</span><span class="sc13">:=</span><span class="sc1">tamanio</span><span class="sc0"> </span><span class="sc9">div</span><span class="sc0"> </span><span class="sc7">1024</span><span class="sc13">;</span><span class="sc0">
+                                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                            </span><span class="sc1">inc</span><span class="sc13">(</span><span class="sc1">loop</span><span class="sc13">);</span><span class="sc0">                  
+                        </span><span class="sc9">until</span><span class="sc0"> </span><span class="sc1">tamanio</span><span class="sc0"> </span><span class="sc13">&lt;</span><span class="sc0"> </span><span class="sc7">100000</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">loop</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">
+                        </span><span class="sc7">1</span><span class="sc13">:</span><span class="sc1">unidad</span><span class="sc13">:=</span><span class="sc10">' bytes'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc7">2</span><span class="sc13">:</span><span class="sc1">unidad</span><span class="sc13">:=</span><span class="sc10">'Kbytes'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc7">3</span><span class="sc13">:</span><span class="sc1">unidad</span><span class="sc13">:=</span><span class="sc10">'Mbytes'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc7">4</span><span class="sc13">:</span><span class="sc1">unidad</span><span class="sc13">:=</span><span class="sc10">'Gbytes'</span><span class="sc13">;</span><span class="sc0">
+                        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+                    
+                    </span><span class="sc1">tamString</span><span class="sc13">:=</span><span class="sc10">' '</span><span class="sc13">+</span><span class="sc1">tamAsString</span><span class="sc13">(</span><span class="sc1">tamanio</span><span class="sc13">,</span><span class="sc7">6</span><span class="sc13">)+</span><span class="sc1">unidad</span><span class="sc13">;</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">tamString</span><span class="sc13">+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">15</span><span class="sc13">-</span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">tamString</span><span class="sc13">)));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">tipoArchivoL</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_mode</span><span class="sc13">)+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">2</span><span class="sc13">));</span><span class="sc0">
+                    </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">tiempoUnixAHumano</span><span class="sc13">(</span><span class="sc1">info</span><span class="sc13">.</span><span class="sc1">st_mtime</span><span class="sc13">)+</span><span class="sc1">espacio</span><span class="sc13">(</span><span class="sc7">2</span><span class="sc13">));</span><span class="sc0">
+                        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">pchar</span><span class="sc13">(</span><span class="sc1">vector</span><span class="sc13">[</span><span class="sc1">J</span><span class="sc13">].</span><span class="sc1">d_name</span><span class="sc13">));</span><span class="sc0">
+                </span><span class="sc9">End</span><span class="sc0"> </span><span class="sc4">// fpStat
+</span><span class="sc0">                </span><span class="sc9">else</span><span class="sc0"> 
+                    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'No se pudo mostrar.'</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">//for
+</span><span class="sc0">            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'- - - - - - - - - - - - - - - -'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">contArchivos</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'No hay listado.'</span><span class="sc13">)</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Nro. de archivos listados: '</span><span class="sc13">,</span><span class="sc1">contArchivos</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">fpCloseDir</span><span class="sc13">(</span><span class="sc1">directorio</span><span class="sc13">^);</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc0"> </span><span class="sc4">//openDir
+</span><span class="sc0">    </span><span class="sc9">else</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">4</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">    
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc4">//Comando PWD
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">pwd</span><span class="sc13">(</span><span class="sc1">tipo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">byte</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">op</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">Begin</span><span class="sc0">
+    </span><span class="sc1">pid</span><span class="sc13">:=</span><span class="sc1">fpFork</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">op</span><span class="sc13">:=</span><span class="sc0"> </span><span class="sc7">0</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">
+    </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc13">:</span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarerror</span><span class="sc13">(</span><span class="sc7">3</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">    
+     </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">dirActual</span><span class="sc13">);</span><span class="sc0">
+            </span><span class="sc1">fpKill</span><span class="sc13">(</span><span class="sc1">fpGetPid</span><span class="sc13">,</span><span class="sc7">9</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">fpWaitPid</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">op</span><span class="sc13">,</span><span class="sc1">op</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Espera por cualquier proceso hijo.  
+</span><span class="sc0">        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">End</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">bg</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> 
+    </span><span class="sc1">numeroTrabajo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">error</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">val</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">numeroTrabajo</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">error</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">pid</span><span class="sc13">:=</span><span class="sc1">damePid</span><span class="sc13">(</span><span class="sc1">numeroTrabajo</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Proceso no Encontrado'</span><span class="sc13">)</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+            </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">SIGCONT</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">fg</span><span class="sc0"> </span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0"> 
+    </span><span class="sc1">numeroTrabajo</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">error</span><span class="sc13">,</span><span class="sc1">pid2</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">estado</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">val</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">,</span><span class="sc1">numeroTrabajo</span><span class="sc13">,</span><span class="sc0"> </span><span class="sc1">error</span><span class="sc13">);</span><span class="sc0">  </span><span class="sc4">//Entrada es SIEMPRE un numero si quiere funcionar (numero en String)
+</span><span class="sc0">    </span><span class="sc1">pid</span><span class="sc13">:=</span><span class="sc1">damePid</span><span class="sc13">(</span><span class="sc1">numeroTrabajo</span><span class="sc13">);</span><span class="sc0">    </span><span class="sc4">//Obtengo el pid correspondiente al numero de trabajo
+</span><span class="sc0">    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">pid</span><span class="sc0"> </span><span class="sc13">=</span><span class="sc0"> </span><span class="sc13">-</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0"> </span><span class="sc4">// No se encontro numero de trabajo
+</span><span class="sc0">        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">mostrarError</span><span class="sc13">(</span><span class="sc7">20</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">exit</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">pidEnEjec</span><span class="sc13">:=</span><span class="sc1">pid</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">//cargo el programa que se va a traer al FG
+</span><span class="sc0">        </span><span class="sc1">pid2</span><span class="sc13">:=</span><span class="sc1">fpfork</span><span class="sc13">;</span><span class="sc0">   </span><span class="sc4">// necesito que la terminal "duerma" mientras hay otra cosa en FG
+</span><span class="sc0">        </span><span class="sc9">case</span><span class="sc0"> </span><span class="sc1">pid2</span><span class="sc0"> </span><span class="sc9">of</span><span class="sc0">
+            </span><span class="sc7">0</span><span class="sc13">:</span><span class="sc0"> </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">FpSetsid</span><span class="sc13">;</span><span class="sc0">   </span><span class="sc2">{ Creo una nueva sesion para el proceso que debe ser traido al frente
+                                http://www.freepascal.org/docs-html/rtl/baseunix/fpsetsid.html
+                                http://stackoverflow.com/questions/9306100/how-can-i-tell-if-a-child-is-asking-for-stdin-how-do-i-tell-it-to-stop-that}</span><span class="sc0">
+                </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">SIGCONT</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Envio senial de resumen al proceso a FG
+</span><span class="sc0">                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">else</span><span class="sc0">
+                </span><span class="sc9">begin</span><span class="sc0">
+                </span><span class="sc1">fpwaitpid</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">estado</span><span class="sc13">,</span><span class="sc7">0</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//Espero que el hijo(proceso actualmente en FG) se detenga
+</span><span class="sc0">                </span><span class="sc1">fpkill</span><span class="sc13">(</span><span class="sc1">SIGKILL</span><span class="sc13">,</span><span class="sc1">pid2</span><span class="sc13">);</span><span class="sc0">
+                </span><span class="sc1">ActualizarEstado</span><span class="sc13">(</span><span class="sc1">pid</span><span class="sc13">,</span><span class="sc1">estado</span><span class="sc13">);</span><span class="sc0"> </span><span class="sc4">//actualizo el estado del proceso que habia enviado a FG
+</span><span class="sc0">                </span><span class="sc1">pidenejec</span><span class="sc13">:=-</span><span class="sc7">1</span><span class="sc13">;</span><span class="sc0"> </span><span class="sc4">// borro el id del proceso que se estaba ejecutando
+</span><span class="sc0">                </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+            </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">    
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">jobs</span><span class="sc13">;</span><span class="sc0"> 
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">mostrarTabla</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">help</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'ALROShell'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Copyright 2015'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'* Ramiro Rivera                &lt;ramarivera@gmail.com&gt;,'</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'* David lazbal             &lt;davidlazbal@gmail.com&gt;,'</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'* Matín Arrúa                &lt;martin94.profugo@gmail.com&gt;.'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Copyright 2014'</span><span class="sc13">);</span><span class="sc0"> 
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'* Fernando Gómez Albornoz     &lt;fgalbornoz07@gmail.com&gt;. '</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Estas órdenes del shell están definidas internamente'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'bg id_trabajo'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'cat primer_archivo [segundo_archivo]'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'cd ruta'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'exit'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'fg id_trabajo'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'jobs'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'kill -id_señal id_proceso'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'ls {[-(l|f|a)]} (3 Parametros máximo) [ruta]'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'pwd'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Este shell acepta los siguientes operadores: "&gt;" "&gt;&gt;" "&amp;" "|"'</span><span class="sc13">);</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+    </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Para más información diríjase a la página man'</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">procedure</span><span class="sc0"> </span><span class="sc1">moo</span><span class="sc13">(</span><span class="sc1">entrada</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">);</span><span class="sc0">
+</span><span class="sc9">var</span><span class="sc0">
+    </span><span class="sc1">aux</span><span class="sc13">:</span><span class="sc9">string</span><span class="sc13">;</span><span class="sc0">
+    </span><span class="sc1">I</span><span class="sc13">:</span><span class="sc1">longint</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">begin</span><span class="sc0">
+    </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">upcase</span><span class="sc13">(</span><span class="sc1">ENTRADA</span><span class="sc13">)&lt;&gt;</span><span class="sc10">'-H'</span><span class="sc0"> </span><span class="sc9">then</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc9">if</span><span class="sc0"> </span><span class="sc1">sinEspacios</span><span class="sc13">(</span><span class="sc1">Entrada</span><span class="sc13">)=</span><span class="sc10">''</span><span class="sc0">  </span><span class="sc9">then</span><span class="sc0"> 
+            </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc10">'Si yo estoy aca es porque CRT no lo esta :)'</span><span class="sc0">
+        </span><span class="sc9">else</span><span class="sc0">
+            </span><span class="sc1">aux</span><span class="sc13">:=</span><span class="sc1">entrada</span><span class="sc13">;</span><span class="sc0">
+        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">' '</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">I</span><span class="sc13">:=</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">aux</span><span class="sc13">)+</span><span class="sc7">2</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+            </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'_'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc1">CR</span><span class="sc13">+</span><span class="sc1">LF</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'( '</span><span class="sc13">+</span><span class="sc1">aux</span><span class="sc13">+</span><span class="sc10">' )'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">' '</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc9">for</span><span class="sc0"> </span><span class="sc1">I</span><span class="sc13">:=</span><span class="sc7">1</span><span class="sc0"> </span><span class="sc9">to</span><span class="sc0"> </span><span class="sc1">length</span><span class="sc13">(</span><span class="sc1">aux</span><span class="sc13">)+</span><span class="sc7">2</span><span class="sc0"> </span><span class="sc9">do</span><span class="sc0">
+            </span><span class="sc1">write</span><span class="sc13">(</span><span class="sc10">'-'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">' '</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'        o   ^__^'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'         o  (oo)\_______'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'            (__)\       )\/\'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'                ||----w |'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'                ||     ||'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc0">
+    </span><span class="sc9">else</span><span class="sc0">
+        </span><span class="sc9">begin</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">space</span><span class="sc13">(</span><span class="sc7">30</span><span class="sc13">)+</span><span class="sc10">'Historia de Moo y los Super Cow Powers'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Very well internet, you win. Let me tell you a tale about cow powers. Super ones to be specific.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Once a long time ago a developer was known for announcing his presence on IRC with a simple, to the point '</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">'Moo'</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">'.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'As with cows in pasture others would often Moo back in greeting. This led to a certain range of cow based jokes.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'When apt-get was initially developed I put the enigmatic tag line in the help message, but I did not add the '</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">'apt-get moo'</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">' command.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'That act lies with another, who decided that the help teaser needed some extra zip. Thus the easter egg was born.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'The items in aptitude are probably a homage, as aptitude was substantially based on apt'</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">'s library.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'It seems very popular, it was featured in Linux Magazine some time ago, and I'</span><span class="sc13">+</span><span class="sc1">chr</span><span class="sc13">(</span><span class="sc7">39</span><span class="sc13">)+</span><span class="sc10">'ve even had people request a Moo when they find me at conferences.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'There have been bug reports to remove it, explain it, and to improve the cow.'</span><span class="sc13">);</span><span class="sc0"> 
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'It was mentioned for a while  in Wikipedia, and now apparently on stack exchange.'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc10">'Now, if you look closely, in the right places, you can find other software with cow powers. Good luck :)﻿'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">(</span><span class="sc1">space</span><span class="sc13">(</span><span class="sc7">50</span><span class="sc13">)+</span><span class="sc10">'-Jason Gunthorpe'</span><span class="sc13">);</span><span class="sc0">
+        </span><span class="sc1">writeln</span><span class="sc13">();</span><span class="sc0">
+        </span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+</span><span class="sc9">end</span><span class="sc13">;</span><span class="sc0">
+
+</span><span class="sc9">END</span><span class="sc13">.</span><span class="sc0">
+</span></div></body>
+</html>

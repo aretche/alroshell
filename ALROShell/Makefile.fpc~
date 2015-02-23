@@ -1,6 +1,6 @@
 [target]
 programs= ALROShell
-units= Analizador Comandos Utilidades ALR
+units= analizador comandos utilidades ALR
 
 [compiler]
 version= 2.4.0

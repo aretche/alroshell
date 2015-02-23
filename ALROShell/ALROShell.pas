@@ -36,7 +36,7 @@ Begin
 pidEnEjec:=-1;					//Inicializacion 
 instalarManejadores;			//Instalacion de manejadores de seniales
 crearTabla;
-writeln('Bienvenido a ALROShell           -Copyright 2013-2015-');
+writeln(space(15)+'Bienvenido a ALROShell           -Copyright 2013-2015-');
 salir:= false;					// Break del ciclo repeat.						
 	repeat
 		alBG:=false;

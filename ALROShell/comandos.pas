@@ -1,19 +1,21 @@
 UNIT comandos;
+
 INTERFACE
 
-Uses BaseUnix, Unix, utilidades, users, ALR;
+Uses 
+	BaseUnix, Unix, utilidades, users, ALR;
 
 procedure cat	(var dir1,dir2: string; tipo: byte);						// CAT - Concatena hasta dos archivos, o un archivo con la salida estandar
 procedure exec 	(param1: String; param2: Array of AnsiString; tipo:byte);	// EXEC - Ejecuta un programa externo. Ruta relativa o absoluta.
 procedure kill 	(signal, proc: longint);									// KILL - Envía una señal a un proceso.
-procedure ls (modoA,modoF,modoL:boolean);
-procedure lsAF (modoA,modoF:boolean);										// LS - Lista los archivos de un determinado directorio.
-procedure lsL(modoA,modoF,modoL:boolean);  									// variante de LS, lista archivos en formato largo.
+procedure ls 	(modoA,modoF,modoL:boolean);								// LS - Lista los archivos de un determinado directorio.							
 procedure pwd	(tipo: byte); 												// PWD - Muestra el directorio actual de trabajo.
-procedure bg(ENTRADA:string);
-procedure fg (ENTRADA:string);
-procedure help;																//Muestra una pantalla de ayuda
-procedure moo(entrada:string);
+procedure bg 	(ENTRADA:string);											// BG - Envia trabajo a segundo plano
+procedure fg 	(ENTRADA:string);											// FG - Envia trabajo al primer plano
+procedure jobs;																// JOBS - Muestra tabla de trabajos
+procedure help;																// HELP - Muestra una pantalla de ayuda
+procedure moo	(entrada:string);											// MOO - Linux users knows ;)
+
 
 IMPLEMENTATION
 
@@ -23,7 +25,6 @@ procedure cat(var dir1,dir2: string; tipo: byte);
 var f1,f2: text;
 	texto: string;
 Begin
-
 	{$I-}		// Evita generar código de control de entrada/salida en el programa
 	assign(f1,dir1);
 	reset(f1);
@@ -60,7 +61,6 @@ Begin
 				close(f2);
 			end;
 	end;
-
 	{$I+}		// Habilita la generación de código de entrada/salida
 End;
 
@@ -69,9 +69,7 @@ End;
 {
 	El comando CD es ejecutado directamente
 	por el analizadorCD en la UNIT analizador
-	 
 }
-
 
 //Comando EXEC
 procedure exec (param1: String; param2: Array of AnsiString; tipo:byte);
@@ -126,8 +124,6 @@ End;
 
 
 //Comando LS
-
-
 procedure ls (modoA,modoF,modoL:boolean);
 {
 	Segun los parametros booleanos distingue entre dos tipos de LS
@@ -391,6 +387,14 @@ begin
 		end;	
 end;
 
+
+procedure jobs;	
+begin
+	mostrarTabla;
+end;
+
+
+
 procedure help;
 begin
 	writeln('ALROShell');
@@ -424,19 +428,10 @@ var
 	aux:string;
 	I:longint;
 begin
-(*___________________________________ 
-( I love Fedora, Debian? Not so much! )
- ------------------------------------- 
-        o   ^__^
-         o  (oo)\_______
-            (__)\       )\/\
-                ||----w |
-                ||     || *)
-
 	if upcase(ENTRADA)<>'-H' then
 		begin
 		if sinEspacios(Entrada)=''  then 
-			aux:='Have you mooed today?'
+			aux:='Si yo estoy aca es porque CRT no lo esta :)'
 		else
 			aux:=entrada;
 		write(' ');
